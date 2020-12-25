@@ -10,11 +10,42 @@ global.jQuery = require('jquery')
 
 function App() {
   return (
-    <div id="app" className="py-3">
-      <Container>
-        <NewCollection />
-      </Container>
-    </div>
+    <>
+      <style type="text/css">
+        {`
+          @font-face {
+            font-family: 'Ubuntu';
+            font-style: normal;
+            font-weight: 300;
+            font-display: swap;
+            src: url(./fonts/Ubuntu/Ubuntu-Light.ttf) format('truetype');
+          }
+          @font-face {
+            font-family: 'Ubuntu';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: url(./fonts/Ubuntu/Ubuntu-Regular.ttf) format('truetype');
+          }
+          @font-face {
+            font-family: 'Ubuntu';
+            font-style: normal;
+            font-weight: 700;
+            font-display: swap;
+            src: url(./fonts/Ubuntu/Ubuntu-Bold.ttf) format('truetype');
+          }
+
+          *{
+            font-family: 'Ubuntu', sans-serif;
+          }
+        `}
+      </style>
+      <div id="app" className="py-3">
+        <Container>
+          <NewCollection />
+        </Container>
+      </div>
+    </>
   )
 }
 
