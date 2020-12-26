@@ -37,6 +37,7 @@ export default function NewCollection() {
   const [upItem, setUpItem] = useState({})
   // collections
   const [collections, setCollections] = useState([])
+  const [modified, setModified] = useState(false)
 
   // close form modal
   const closeModal = () => {
@@ -62,7 +63,7 @@ export default function NewCollection() {
       collection.type === upItem.type
     ) {
       closeModal()
-      return ''
+      return null
     }
 
     // collection.name is the same but the other two is not
@@ -74,19 +75,32 @@ export default function NewCollection() {
       return false
     }
 
-    for (var i = 0; i < collections.length; i++) {
-      // collection.name is similar with the other collection names
-      if (collection.name === collections[i].name) {
-        return true
-      }
+    const chk = collections.filter((col) => {
+      return col.name === collection.name
+    })
+    if (chk.length > 0) {
+      return true
     }
 
     // doesn't fit any condition above
     return false
   }
 
+  const refurbArray = () => {
+    var colx = collections
+
+    for (var i = 0; i < collections.length; i++) {
+      colx[i].id = i
+    }
+
+    setCollections(colx)
+  }
+
   // handle form and inputs
   const handleFormSubmit = (name, desc, type) => {
+    // refurb the array
+    refurbArray()
+
     // set new itm
     const item = {
       id: collections.length,
@@ -105,10 +119,11 @@ export default function NewCollection() {
       )
       setAlert(true)
     } else if (check === false) {
+      setAlert(false)
       // if update form
       // remove first the collection
       if (update) {
-        handleRemoveCollection(upItem, true)
+        handleRemoveCollection(upItem, false)
       }
 
       // set new states
@@ -131,9 +146,9 @@ export default function NewCollection() {
     e.preventDefault()
 
     // get form input values
-    const name = document.getElementById('collection-name').value
-    const desc = document.getElementById('collection-description').value
-    const type = document.getElementById('collection-type').value
+    const name = document.getElementById('collection-name').value.trim()
+    const desc = document.getElementById('collection-description').value.trim()
+    const type = document.getElementById('collection-type').value.trim()
 
     // check if blank
     if (name === '' || desc === '' || type === '') {
@@ -154,7 +169,7 @@ export default function NewCollection() {
   }
 
   // handle removing of collection
-  const handleRemoveCollection = (collection, up) => {
+  const handleRemoveCollection = (collection, remove) => {
     // remove the collection
     var newCols = collections
     const index = newCols.indexOf(collection)
@@ -166,14 +181,18 @@ export default function NewCollection() {
     // set new state
     setCollections(newCols)
 
+    refurbArray()
+
     // do not execute this if doing
     // update on a collection
-    if (!up) {
+    if (remove) {
       // save it to the file
       saveCollections(newCols)
 
-      // load the collection once again, ..
-      loadCollections()
+      setModified(true)
+
+      // // load the collection once again, ..
+      // loadCollections()
     }
   }
 
@@ -201,6 +220,7 @@ export default function NewCollection() {
         console.error(e)
       }
     })
+    setModified(false)
   }
 
   useEffect(() => {
@@ -211,6 +231,9 @@ export default function NewCollection() {
   useEffect(() => {
     loadCollections()
   }, [colItem])
+  useEffect(() => {
+    loadCollections()
+  }, [modified])
 
   return (
     <>
@@ -266,7 +289,9 @@ export default function NewCollection() {
                     >
                       <div className="d-flex align-items-center justify-content-center">
                         <div className="w-75">
-                          <h3 className="display-6">{collection.name}</h3>
+                          <h3 className="display-6 text-truncate">
+                            {collection.name}
+                          </h3>
                           <p className="lead pl-2 text-truncate">
                             {collection.description}
                           </p>
@@ -299,7 +324,7 @@ export default function NewCollection() {
                             size="sm"
                             className="my-1"
                             onClick={() =>
-                              handleRemoveCollection(collection, false)
+                              handleRemoveCollection(collection, true)
                             }
                           >
                             Remove
