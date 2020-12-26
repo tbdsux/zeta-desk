@@ -31,7 +31,7 @@ export default function NewCollection() {
 
   // close form modal
   const closeModal = () => {
-    // reset
+    // reset the alert message
     setAlertMessage('')
 
     // close modal
@@ -76,6 +76,9 @@ export default function NewCollection() {
     return false
   }
 
+  // refurb the array
+  // this will change the id of each item
+  // in order to avoid having similar id
   const refurbArray = () => {
     var colx = collections
 
@@ -88,10 +91,9 @@ export default function NewCollection() {
 
   // handle form and inputs
   const handleFormSubmit = (name, desc, type) => {
-    // refurb the array
     refurbArray()
 
-    // set new itm
+    // set new item
     const item = {
       id: collections.length,
       name: name,
@@ -118,7 +120,7 @@ export default function NewCollection() {
 
       // set new states
       setColItem(item)
-      setCollections([...collections, item])
+      setModified(true)
 
       // save the list
       // this is being overriden by the `datamodified` event,
@@ -217,13 +219,10 @@ export default function NewCollection() {
     Wails.Events.On('datamodified', () => {
       loadCollections()
     })
-  })
+  }, [])
   useEffect(() => {
     loadCollections()
-  }, [colItem])
-  useEffect(() => {
-    loadCollections()
-  }, [modified])
+  }, [colItem, modified])
 
   return (
     <>
