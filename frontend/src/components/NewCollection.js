@@ -12,16 +12,6 @@ import {
 import Modal from 'react-modal'
 import * as Wails from '@wailsapp/runtime'
 
-// CHANGES THIS WITH YOUR FAVOURITE ONES
-const Colors = {
-  movies: 'teal',
-  series: 'blue',
-  anime: 'purple',
-  books: 'bgray',
-  manga: 'cyan',
-  asian_drama: 'amber',
-}
-
 export default function NewCollection() {
   // main adding and updating form modal
   const [modal, setModal] = useState(false)
@@ -237,34 +227,6 @@ export default function NewCollection() {
 
   return (
     <>
-      <style type="text/css">
-        {`
-            .bg-teal-500{
-                background: #009688;
-                color: white;
-            }
-            .bg-blue-500{
-                background: #2196F3;
-                color: white;
-            }
-            .bg-amber-500{
-                background: #FFC107;
-                color: white;
-            }
-            .bg-bgray-500{
-                background: #607D8B;
-                color: white;
-            }
-            .bg-purple-500{
-                background: #9C27B0;
-                color: white;
-            }
-            .bg-cyan-500{
-                background: #00BCD4;
-                color: white;
-            }
-        `}
-      </style>
       <div>
         <div className="bg-white py-3">
           <header className="d-flex justify-content-between align-items-center">
@@ -283,9 +245,7 @@ export default function NewCollection() {
                 .map((collection) => (
                   <Col key={collection.id}>
                     <div
-                      className={`bg-${
-                        Colors[collection.type]
-                      }-500 p-4 rounded-lg mb-4`}
+                      className={`bg-${collection.type} p-4 rounded-lg mb-4`}
                     >
                       <div className="d-flex align-items-center justify-content-center">
                         <div className="w-75">

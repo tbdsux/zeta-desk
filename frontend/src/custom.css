@@ -1,0 +1,28 @@
+* {
+  font-family: 'Ubuntu', sans-serif;
+}
+
+.bg-movies {
+  background: #009688;
+  color: white;
+}
+.bg-series {
+  background: #2196f3;
+  color: white;
+}
+.bg-asian_drama {
+  background: #ffc107;
+  color: white;
+}
+.bg-books {
+  background: #607d8b;
+  color: white;
+}
+.bg-anime {
+  background: #9c27b0;
+  color: white;
+}
+.bg-manga {
+  background: #00bcd4;
+  color: white;
+}
