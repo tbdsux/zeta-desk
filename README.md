@@ -4,6 +4,10 @@ A simple desktop app for managing collections.
 
 This is a simple desktop port of my simple web app [**zeta**](https://github.com/TheBoringDude/zeta)
 
+#### Screenshot
+
+![zeta-desk Screenshot](./assets/screenshot.png)
+
 ### NOTE:
 
 I am a beginner with using `go` and `react` :sweat_smile:, and my code is very messy. Appreciate help in chunking and refactoring it. :blush:
