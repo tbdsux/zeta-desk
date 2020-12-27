@@ -16,7 +16,7 @@ export default function NewCollection() {
   // main adding and updating form modal
   const [modal, setModal] = useState(false)
   // new item added
-  const [colItem, setColItem] = useState({})
+  const [loadOnce, setLoadOnce] = useState(true)
   // alert messages
   const [alert, setAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
@@ -27,6 +27,7 @@ export default function NewCollection() {
   const [upItem, setUpItem] = useState({})
   // collections
   const [collections, setCollections] = useState([])
+  const [saved, setSaved] = useState(false)
   const [modified, setModified] = useState(false)
 
   // close form modal
@@ -80,13 +81,15 @@ export default function NewCollection() {
   // this will change the id of each item
   // in order to avoid having similar id
   const refurbArray = () => {
-    var colx = collections
+    if (collections.length > 0) {
+      var colx = collections
 
-    for (var i = 0; i < collections.length; i++) {
-      colx[i].id = i
+      for (var i = 0; i < collections.length; i++) {
+        colx[i].id = i
+      }
+
+      setCollections(colx)
     }
-
-    setCollections(colx)
   }
 
   // handle form and inputs
@@ -112,6 +115,7 @@ export default function NewCollection() {
       setAlert(true)
     } else if (check === false) {
       setAlert(false)
+
       // if update form
       // remove first the collection
       if (update) {
@@ -119,13 +123,8 @@ export default function NewCollection() {
       }
 
       // set new states
-      setColItem(item)
+      setCollections([...collections, item])
       setModified(true)
-
-      // save the list
-      // this is being overriden by the `datamodified` event,
-      // call it once the list has been updated and pass the new
-      saveCollections([...collections, item])
 
       // close the modal after
       closeModal()
@@ -178,13 +177,7 @@ export default function NewCollection() {
     // do not execute this if doing
     // update on a collection
     if (remove) {
-      // save it to the file
-      saveCollections(newCols)
-
       setModified(true)
-
-      // // load the collection once again, ..
-      // loadCollections()
     }
   }
 
@@ -196,33 +189,60 @@ export default function NewCollection() {
     setUpItem(collection)
   }
 
-  // save collections to data file
-  const saveCollections = (collection) => {
-    window.backend.Collections.SaveCollections(
-      JSON.stringify(collection, null, 2),
-    )
-  }
-
   // load collections from file
   const loadCollections = () => {
     window.backend.Collections.LoadCollections().then((list) => {
       try {
         setCollections(JSON.parse(list))
+
+        setModified(false)
       } catch (e) {
+        // this will crash the app,
+        // todo: add handler and show the error on the ui
         console.error(e)
       }
     })
-    setModified(false)
   }
 
   useEffect(() => {
     Wails.Events.On('datamodified', () => {
-      loadCollections()
+      // if not set, it will loop around
+      // might be a bug with the fsnotify watcher
+      // I don't know why this works though
+      if (saved && modified) {
+        loadCollections()
+        setSaved(false)
+      }
     })
-  }, [])
+  }, [saved, modified, collections])
+
   useEffect(() => {
-    loadCollections()
-  }, [colItem, modified])
+    // this will only load the
+    // list once on startup
+    if (loadOnce) {
+      loadCollections()
+      setLoadOnce(false)
+    }
+  }, [loadOnce])
+
+  useEffect(() => {
+    const saveCollections = () => {
+      window.backend.Collections.SaveCollections(
+        JSON.stringify(collections, null, 2),
+      )
+    }
+
+    // not confirming if modified
+    // will loop around this function
+    // and will crash the app
+    // I don't know why this works though, .. hmmm
+    if (modified) {
+      saveCollections()
+
+      setSaved(true)
+      setModified(false)
+    }
+  }, [collections, modified])
 
   return (
     <>
