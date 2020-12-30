@@ -1,4 +1,4 @@
-module zeta-desk
+module github.com/TheBoringDude/zeta-desk
 
 go 1.15
 

@@ -4,11 +4,19 @@ import (
 	"log"
 	"path"
 
+	"github.com/TheBoringDude/zeta-desk/utils"
 	"github.com/leaanthony/mewn"
 	"github.com/wailsapp/wails"
 )
 
-// WailsInit => runtime events
+// WailsInit => runtime events for Items
+func (i *Items) WailsInit(runtime *wails.Runtime) error {
+	i.runtime = runtime
+
+	return nil
+}
+
+// WailsInit => runtime events for Collections
 func (c *Collections) WailsInit(runtime *wails.Runtime) error {
 	c.runtime = runtime
 	c.logger = c.runtime.Log.New("Collections")
@@ -24,10 +32,10 @@ func (c *Collections) WailsInit(runtime *wails.Runtime) error {
 	c.filename = path.Join(c.datapath, DEFAULTCOLLECTIONSLIST)
 
 	// check folder and data file
-	c.ensureFileFolder()
+	utils.EnsureFileFolder(c.datapath, c.filename)
 
 	// return the watcher
-	return c.startWatcher()
+	return utils.StartWatcher(c.runtime, c.logger, c.filename, "datamodified")
 }
 
 // APP is based from tutorial: https://wails.app/tutorials/todo/
@@ -37,6 +45,10 @@ func main() {
 	css := mewn.String("./frontend/build/static/css/main.css")
 
 	newCols, err := NewCollections()
+	if err != nil {
+		log.Fatal(err)
+	}
+	colItems, err := NewItemsCollections()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -50,5 +62,6 @@ func main() {
 		Colour: "#131313",
 	})
 	app.Bind(newCols)
+	app.Bind(colItems)
 	app.Run()
 }

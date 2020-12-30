@@ -1,5 +1,5 @@
 import React from 'react'
-import { Col, Button, Form } from 'react-bootstrap'
+import { Col, Button } from 'react-bootstrap'
 
 export default function MapCol(props) {
   const collection = props.collection

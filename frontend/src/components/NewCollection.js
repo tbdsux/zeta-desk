@@ -8,6 +8,8 @@ import CollectionsModal from './Modal'
 import Modal from 'react-modal'
 import * as Wails from '@wailsapp/runtime'
 
+Modal.setAppElement("#app")
+
 export default function NewCollection() {
   // reference form modal inputs
   const colName = useRef(null)
