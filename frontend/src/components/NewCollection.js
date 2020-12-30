@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from 'react'
-import {
-  Button,
-  Modal as ColModal,
-  Form,
-  Alert,
-  Row,
-  Col,
-  Container,
-} from 'react-bootstrap'
+import React, { useState, useEffect, useRef } from 'react'
+import { Button, Modal as ColModal, Row, Container } from 'react-bootstrap'
+
+import MapCol from './collections/Map'
+import AddUpdateModalContent from './collections/AddUpdate'
+import CollectionsModal from './Modal'
 
 import Modal from 'react-modal'
 import * as Wails from '@wailsapp/runtime'
 
 export default function NewCollection() {
+  // reference form modal inputs
+  const colName = useRef(null)
+  const colDesc = useRef(null)
+  const colType = useRef(null)
+
   // main adding and updating form modal
   const [modal, setModal] = useState(false)
   // new item added
@@ -29,6 +30,8 @@ export default function NewCollection() {
   const [collections, setCollections] = useState([])
   const [saved, setSaved] = useState(false)
   const [modified, setModified] = useState(false)
+
+  const [viewCollection, setViewCollection] = useState({})
 
   // close form modal
   const closeModal = () => {
@@ -136,10 +139,10 @@ export default function NewCollection() {
   const submitForm = (e) => {
     e.preventDefault()
 
-    // get form input values
-    const name = document.getElementById('collection-name').value.trim()
-    const desc = document.getElementById('collection-description').value.trim()
-    const type = document.getElementById('collection-type').value.trim()
+    //get form input values
+    const name = colName.current.value
+    const desc = colDesc.current.value
+    const type = colType.current.value
 
     // check if blank
     if (name === '' || desc === '' || type === '') {
@@ -152,11 +155,12 @@ export default function NewCollection() {
   }
 
   // handle showing of collection modal
-  const handleModal = (e) => {
-    e.preventDefault()
-
+  const handleModal = (collection) => {
     // open modal
     setRModal(true)
+
+    // set the item to view
+    setViewCollection(collection)
   }
 
   // handle removing of collection
@@ -262,56 +266,13 @@ export default function NewCollection() {
             <Row md={2}>
               {collections
                 .map((collection) => (
-                  <Col key={collection.id}>
-                    <div
-                      className={`bg-${collection.type} p-4 rounded-lg mb-4`}
-                    >
-                      <div className="d-flex align-items-center justify-content-center">
-                        <div className="w-75">
-                          <h3 className="display-6 text-truncate">
-                            {collection.name}
-                          </h3>
-                          <p className="lead pl-2 text-truncate">
-                            {collection.description}
-                          </p>
-                          <p className="text-white font-weight-light">
-                            {collection.type}
-                          </p>
-                        </div>
-                        <div className="w-25 ml-2 d-flex align-items-center flex-column">
-                          <Form>
-                            <Button
-                              variant="light"
-                              size="lg"
-                              className="my-1"
-                              type="submit"
-                              onClick={handleModal}
-                            >
-                              View
-                            </Button>
-                          </Form>
-                          <Button
-                            variant="success"
-                            size="sm"
-                            className="my-1"
-                            onClick={() => handleUpdateCollection(collection)}
-                          >
-                            Update
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            className="my-1"
-                            onClick={() =>
-                              handleRemoveCollection(collection, true)
-                            }
-                          >
-                            Remove
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </Col>
+                  <MapCol
+                    key={collection.id}
+                    handleModal={handleModal}
+                    collection={collection}
+                    handleRemoveCollection={handleRemoveCollection}
+                    handleUpdateCollection={handleUpdateCollection}
+                  />
                 ))
                 .reverse()}
             </Row>
@@ -319,17 +280,12 @@ export default function NewCollection() {
 
           <Modal
             isOpen={rmodal}
-            onRequestClose={() => setRModal(false)}
-            contentLabel="Example Modal"
+            onRequestClose={() => {
+              setRModal(false)
+              setViewCollection({}) // remove the current item
+            }}
           >
-            <div>I am a modal</div>
-            <form>
-              <input />
-              <button>tab navigation</button>
-              <button>stays</button>
-              <button>inside</button>
-              <button>the modal</button>
-            </form>
+            <CollectionsModal collection={viewCollection} />
           </Modal>
 
           <ColModal
@@ -340,90 +296,17 @@ export default function NewCollection() {
             animation={false}
             keyboard={false}
           >
-            <ColModal.Header closeButton>
-              {update ? (
-                <ColModal.Title>
-                  Update{' '}
-                  <span className="font-weight-bold">'{upItem.name}'</span>
-                </ColModal.Title>
-              ) : (
-                <ColModal.Title>Create New Collection</ColModal.Title>
-              )}
-            </ColModal.Header>
-            <Form onSubmit={submitForm}>
-              <ColModal.Body>
-                <Alert
-                  show={alert}
-                  variant="warning"
-                  className="mb-2"
-                  transition={null}
-                >
-                  {alertMessage}
-                </Alert>
-                <div className="w-75 mx-auto">
-                  <Form.Group controlId="collection-name">
-                    <Form.Label>
-                      What should be your Collection Name?
-                    </Form.Label>
-                    <Form.Control
-                      required
-                      size="lg"
-                      type="text"
-                      defaultValue={update ? `${upItem.name}` : null}
-                      placeholder="My Amazing Collection"
-                      // onChange={(e) => setColName(e.target.value)}
-                    />
-                  </Form.Group>
-                  <Form.Group controlId="collection-description">
-                    <Form.Label>Add a short description...</Form.Label>
-                    <Form.Control
-                      required
-                      size="lg"
-                      type="text"
-                      defaultValue={update ? `${upItem.description}` : null}
-                      placeholder="A short description"
-                      // onChange={(e) => setColDesc(e.target.value)}
-                    />
-                  </Form.Group>
-                  <Form.Group controlId="collection-type">
-                    <Form.Label>
-                      Select the type of your collection...
-                    </Form.Label>
-                    <Form.Control
-                      defaultValue={update ? `${upItem.type}` : -1}
-                      required
-                      size="lg"
-                      as="select"
-                      // onChange={(e) => setColType(e.target.value)}
-                    >
-                      <option disabled value={-1} key={-1}>
-                        Collection Type
-                      </option>
-                      <option value="movies">Movies</option>
-                      <option value="series">Series</option>
-                      <option value="anime">Anime</option>
-                      <option value="books">Books</option>
-                      <option value="manga">Manga</option>
-                      <option value="asian_drama">Asian Drama</option>
-                    </Form.Control>
-                  </Form.Group>
-                </div>
-              </ColModal.Body>
-              <ColModal.Footer>
-                <Button variant="secondary" onClick={closeModal}>
-                  Close
-                </Button>
-                {update ? (
-                  <Button variant="primary" type="submit">
-                    Update Collection
-                  </Button>
-                ) : (
-                  <Button variant="primary" type="submit">
-                    Create Collection
-                  </Button>
-                )}
-              </ColModal.Footer>
-            </Form>
+            <AddUpdateModalContent
+              update={update}
+              upItem={upItem}
+              submitForm={submitForm}
+              alert={alert}
+              alertMessage={alertMessage}
+              colName={colName}
+              colDesc={colDesc}
+              colType={colType}
+              closeModal={closeModal}
+            />
           </ColModal>
         </Container>
       </div>
