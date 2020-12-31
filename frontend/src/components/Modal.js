@@ -25,19 +25,20 @@ export default function CollectionModal(props) {
   // from the response
   const handleCoverImage = (type, res) => {
     if (type === 'movies' || type === 'series') {
-      if (res.poster_path === undefined || res.backdrop_path === undefined) {
+      console.log(res.poster_path, res.backdrop_path)
+      if (res.poster_path === null && res.backdrop_path === null) {
         return false
       }
     } else if (type === 'anime' || type === 'manga') {
-      if (res.image_url === undefined) {
+      if (res.image_url === undefined || res.image_url === null) {
         return false
       }
     } else if (type === 'asian_drama') {
-      if (res.thumb === undefined) {
+      if (res.thumb === undefined || res.thumb === null) {
         return false
       }
     } else if (type === 'books') {
-      if (res.cover_i === undefined) {
+      if (res.cover_i === undefined || res.cover_i === null) {
         return false
       }
     }
@@ -119,7 +120,7 @@ export default function CollectionModal(props) {
       .then((res) => {
         const data = res.data
 
-        setSearchResults(data.results)
+        setSearchResults(data.docs)
         setSearching(false)
       })
       .catch((err) => console.error(err))

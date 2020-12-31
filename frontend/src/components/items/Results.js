@@ -21,7 +21,8 @@ export default function SearchResult(props) {
         'https://image.tmdb.org/t/p/w600_and_h900_bestv2/' + result.poster_path
     } else {
       resCover =
-        'https://image.tmdb.org/t/p/w600_and_h900_bestv2/' + result.poster_path
+        'https://image.tmdb.org/t/p/w600_and_h900_bestv2/' +
+        result.backdrop_path
     }
   }
   // series
@@ -39,7 +40,8 @@ export default function SearchResult(props) {
         'https://image.tmdb.org/t/p/w600_and_h900_bestv2/' + result.poster_path
     } else {
       resCover =
-        'https://image.tmdb.org/t/p/w600_and_h900_bestv2/' + result.poster_path
+        'https://image.tmdb.org/t/p/w600_and_h900_bestv2/' +
+        result.backdrop_path
     }
   }
   // anime || manga
