@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "@wailsapp/runtime": "^1.0.10",
+    "axios": "^0.21.1",
     "bootstrap": "^4.5.3",
     "core-js": "^3.6.4",
     "jquery": "^3.5.1",
