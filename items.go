@@ -30,7 +30,7 @@ func NewItemsCollections() (*Items, error) {
 		return items, err
 	}
 
-	items.datapath = path.Join(homedir, ZETADATADIR, "data")
+	items.datapath = path.Join(homedir, ZETADATADIR, COLLECTIONS_DIR)
 
 	return items, nil
 }

@@ -17,6 +17,9 @@ var DEFAULTCOLLECTIONSLIST string = "collections.json"
 // ZETADATADIR => default data directory for the app
 var ZETADATADIR string = ".zeta_data"
 
+// COLLECTIONS_DIR => subdirectory to store each itemlist
+var COLLECTIONS_DIR = "data"
+
 // Collections => main structs for the app
 type Collections struct {
 	filename string
@@ -62,9 +65,18 @@ func (c *Collections) SaveCollections(collections string) error {
 
 // CreateDataFile => creates the data file for the collection
 func (c *Collections) CreateDataFile(filename string) {
-	dataPath := path.Join(c.datapath, "data")
+	dataPath := path.Join(c.datapath, COLLECTIONS_DIR)
 	dataFile := path.Join(dataPath, filename)
-	
+
 	// create the initial file
 	utils.EnsureFileFolder(dataPath, dataFile)
+}
+
+// RemoveDataFile => removes the data file if collection is also removed
+func (c *Collections) RemoveDataFile(filename string) error {
+	rFile := path.Join(c.datapath, COLLECTIONS_DIR, filename)
+
+	err := os.Remove(rFile)
+
+	return err
 }

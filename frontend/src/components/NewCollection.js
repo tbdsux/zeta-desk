@@ -183,7 +183,12 @@ export default function NewCollection() {
     // do not execute this if doing
     // update on a collection
     if (remove) {
-      setModified(true)
+      // remove the data file
+      window.backend.Collections.RemoveDataFile(collection.itemList)
+        .then(() => {
+          setModified(true)
+        })
+        .catch((e) => console.error(e))
     }
   }
 
