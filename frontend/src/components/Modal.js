@@ -1,7 +1,10 @@
-import React, { useState, useRef } from 'react'
-import { Modal, Button, Form, Row } from 'react-bootstrap'
+import React, { useState, useRef, useEffect } from 'react'
+import { Modal, Button, Form, Row, Col, Image } from 'react-bootstrap'
 import SearchResult from './items/Results'
 import axios from 'axios'
+import { nanoid } from 'nanoid'
+
+import * as Wails from '@wailsapp/runtime'
 
 export default function CollectionModal(props) {
   const collection = props.collection
@@ -14,6 +17,11 @@ export default function CollectionModal(props) {
     books: 'OpenLibrary.org',
   }
 
+  const [modified, setModified] = useState(false)
+  const [viewItems, setViewItems] = useState([])
+  // const [init, setInit] = useState(true)
+
+  // items searching
   const [addModal, setAddModal] = useState(false)
   const [searching, setSearching] = useState(false)
   const [searchResults, setSearchResults] = useState({})
@@ -25,7 +33,6 @@ export default function CollectionModal(props) {
   // from the response
   const handleCoverImage = (type, res) => {
     if (type === 'movies' || type === 'series') {
-      console.log(res.poster_path, res.backdrop_path)
       if (res.poster_path === null && res.backdrop_path === null) {
         return false
       }
@@ -82,7 +89,6 @@ export default function CollectionModal(props) {
       })
       .catch((err) => console.error(err))
   }
-
   // anime & manga handlers || both have similar API structures
   const GetAnimeManga = (type) => {
     axios
@@ -97,7 +103,6 @@ export default function CollectionModal(props) {
       })
       .catch((err) => console.error(err))
   }
-
   // kdrama handler
   const GetKDrama = () => {
     axios
@@ -110,7 +115,6 @@ export default function CollectionModal(props) {
       })
       .catch((err) => console.error(err))
   }
-
   // books handler
   const GetBooks = () => {
     axios
@@ -125,6 +129,70 @@ export default function CollectionModal(props) {
       })
       .catch((err) => console.error(err))
   }
+
+  // adding items to the group
+  const handleAddNewItem = (cover, title) => {
+    const item = {
+      id: nanoid(),
+      title: title,
+      image: cover,
+    }
+
+    setViewItems([item, ...viewItems])
+    setModified(true)
+    setAddModal(false)
+  }
+
+  // load items from items data file
+  const loadItems = () => {
+    window.backend.Items.LoadItems().then((res) => {
+      try {
+        // props.setItems(JSON.parse(res))
+        setViewItems(JSON.parse(res))
+      } catch (e) {
+        console.error(e)
+      }
+    })
+  }
+
+  // handle removing of items
+  const handleRemoveItem = (item) => {
+    var items = viewItems
+    items.splice(items.indexOf(item))
+
+    setModified(true)
+    setViewItems(items)
+  }
+
+  useEffect(() => {
+    // if loaded once and is first initialization
+    if (props.init) {
+      window.backend.Items.Initialize(collection.itemList)
+        .then(() => {
+          loadItems()
+
+          props.setInit(false)
+        })
+        .catch((e) => console.error(e))
+    }
+
+    // items_modified -> event
+    Wails.Events.On('items_modified', () => {
+      loadItems()
+    })
+  })
+
+  // save items, if modified == true
+  useEffect(() => {
+    if (modified) {
+      const saveItems = () => {
+        window.backend.Items.SaveItems(JSON.stringify(viewItems, null, 2))
+      }
+
+      saveItems()
+      setModified(false)
+    }
+  }, [modified, viewItems])
 
   return (
     <>
@@ -146,6 +214,28 @@ export default function CollectionModal(props) {
             </Button>
           </div>
         </Modal.Header>
+        <Modal.Body className="overflow-auto">
+          <Row md={5}>
+            {viewItems.map((item) => (
+              <Col key={item.id}>
+                <div className="mb-4 bg-light">
+                  <div>
+                    <Image fluid src={item.image} />
+                  </div>
+                  <div className="text-center mt-2 p-3">
+                    <h5 className="font-weight-light">{item.title}</h5>
+                    <Button
+                      variant="danger"
+                      onClick={() => handleRemoveItem(item)}
+                    >
+                      remove item
+                    </Button>
+                  </div>
+                </div>
+              </Col>
+            ))}
+          </Row>
+        </Modal.Body>
       </div>
 
       <Modal
@@ -210,6 +300,7 @@ export default function CollectionModal(props) {
                         key={searchResults.indexOf(res)}
                         result={res}
                         type={collection.type}
+                        handleAddNewItem={handleAddNewItem}
                       />
                     ) : null,
                   )}

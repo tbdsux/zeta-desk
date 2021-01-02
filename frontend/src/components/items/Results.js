@@ -7,6 +7,7 @@ export default function SearchResult(props) {
   var resTitle = ''
   var resCover = ''
 
+  // movies
   if (props.type === 'movies') {
     // set result title
     if (result.release_date !== undefined) {
@@ -18,11 +19,12 @@ export default function SearchResult(props) {
     // set result cover
     if (result.poster_path !== undefined) {
       resCover =
-        'https://image.tmdb.org/t/p/w600_and_h900_bestv2/' + result.poster_path
+        'https://image.tmdb.org/t/p/w600_and_h900_bestv2/' +
+        result.poster_path.replace('/', '')
     } else {
       resCover =
         'https://image.tmdb.org/t/p/w600_and_h900_bestv2/' +
-        result.backdrop_path
+        result.backdrop_path.replace('/', '')
     }
   }
   // series
@@ -37,11 +39,12 @@ export default function SearchResult(props) {
     // set result cover
     if (result.poster_path !== undefined) {
       resCover =
-        'https://image.tmdb.org/t/p/w600_and_h900_bestv2/' + result.poster_path
+        'https://image.tmdb.org/t/p/w600_and_h900_bestv2/' +
+        result.poster_path.replace('/', '')
     } else {
       resCover =
         'https://image.tmdb.org/t/p/w600_and_h900_bestv2/' +
-        result.backdrop_path
+        result.backdrop_path.replace('/', '')
     }
   }
   // anime || manga
@@ -85,7 +88,12 @@ export default function SearchResult(props) {
         </div>
         <div className="text-center mt-2 p-3">
           <h5 className="font-weight-light">{resTitle}</h5>
-          <Button variant="primary">add item</Button>
+          <Button
+            variant="primary"
+            onClick={() => props.handleAddNewItem(resCover, resTitle)}
+          >
+            add item
+          </Button>
         </div>
       </div>
     </Col>

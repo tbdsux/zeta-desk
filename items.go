@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"os"
 	"path"
 
 	"github.com/TheBoringDude/zeta-desk/utils"
+	"github.com/fsnotify/fsnotify"
 	"github.com/wailsapp/wails"
 )
 
@@ -14,6 +17,7 @@ type Items struct {
 	datapath string
 	runtime  *wails.Runtime
 	logger   *wails.CustomLogger
+	watcher  *fsnotify.Watcher
 }
 
 // NewItemsCollections => attemps to create a new instance of the items
@@ -39,10 +43,30 @@ func (i *Items) Initialize(filename string) error {
 
 	utils.EnsureFileFolder(i.datapath, i.datafile)
 
-	return utils.StartWatcher(i.runtime, i.logger, i.datafile, "itemsmodified")
+	return i.StartWatcher()
+}
+
+// StopWatcher => stops watching the file
+func (i *Items) StopWatcher() error {
+	err := i.watcher.Remove(i.datafile)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // LoadItems => loads the items from a collection data file
-func (i *Items) LoadItems() {
+func (i *Items) LoadItems() (string, error) {
+	bytes, err := ioutil.ReadFile(i.datafile)
+	fmt.Println(i.datafile)
+	if err != nil {
+		err = fmt.Errorf("Unable to load datafile: %s", i.datafile)
+	}
 
+	return string(bytes), err
+}
+
+// SaveItems => saves the items to its datafile
+func (i *Items) SaveItems(items string) error {
+	return ioutil.WriteFile(i.datafile, []byte(items), 0600)
 }

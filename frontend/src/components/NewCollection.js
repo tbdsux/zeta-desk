@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Button, Modal as ColModal, Row, Container } from 'react-bootstrap'
+import { nanoid } from 'nanoid'
 
 import MapCol from './collections/Map'
 import AddUpdateModalContent from './collections/AddUpdate'
@@ -8,7 +9,7 @@ import CollectionsModal from './Modal'
 import Modal from 'react-modal'
 import * as Wails from '@wailsapp/runtime'
 
-Modal.setAppElement("#app")
+Modal.setAppElement('#app')
 
 export default function NewCollection() {
   // reference form modal inputs
@@ -18,16 +19,21 @@ export default function NewCollection() {
 
   // main adding and updating form modal
   const [modal, setModal] = useState(false)
+
   // new item added
   const [loadOnce, setLoadOnce] = useState(true)
+
   // alert messages
   const [alert, setAlert] = useState(false)
   const [alertMessage, setAlertMessage] = useState('')
+
   // collection modal
   const [rmodal, setRModal] = useState(false)
   const [update, setUpdate] = useState(false)
+
   // to be updated item
   const [upItem, setUpItem] = useState({})
+
   // collections
   const [collections, setCollections] = useState([])
   const [saved, setSaved] = useState(false)
@@ -107,10 +113,13 @@ export default function NewCollection() {
       name: name,
       description: desc,
       type: type,
-      itemList: name.replace(' ', '_').toLowerCase() + '.js',
+      itemList: nanoid() + '.json',
     }
 
     const check = checkIfExists(item)
+
+    // create the file
+    window.backend.Collections.CreateDataFile(item.itemList)
 
     // check first if the item exists from the current one
     if (check === true) {
@@ -154,15 +163,6 @@ export default function NewCollection() {
       // submit the form
       handleFormSubmit(name, desc, type)
     }
-  }
-
-  // handle showing of collection modal
-  const handleModal = (collection) => {
-    // open modal
-    setRModal(true)
-
-    // set the item to view
-    setViewCollection(collection)
   }
 
   // handle removing of collection
@@ -250,6 +250,31 @@ export default function NewCollection() {
     }
   }, [collections, modified])
 
+  // ## FUNCTION, HANDLERS for ITEMS GROUP
+  const [init, setInit] = useState(false)
+
+  // handle showing of collection modal
+  const handleModal = (collection) => {
+    // open modal
+    setRModal(true)
+    setInit(true)
+
+    // set the item to view
+    setViewCollection(collection)
+  }
+
+  // handles closing of items modal
+  const handleCloseModal = () => {
+    // stop watching the items file
+    window.backend.Items.StopWatcher()
+      .then(() => {
+        setRModal(false)
+        setInit(false)
+        setViewCollection({}) // remove the current item
+      })
+      .catch((e) => console.error(e))
+  }
+
   return (
     <>
       <div>
@@ -280,14 +305,12 @@ export default function NewCollection() {
             </Row>
           </div>
 
-          <Modal
-            isOpen={rmodal}
-            onRequestClose={() => {
-              setRModal(false)
-              setViewCollection({}) // remove the current item
-            }}
-          >
-            <CollectionsModal collection={viewCollection} />
+          <Modal isOpen={rmodal} onRequestClose={handleCloseModal}>
+            <CollectionsModal
+              collection={viewCollection}
+              init={init}
+              setInit={setInit}
+            />
           </Modal>
 
           <ColModal

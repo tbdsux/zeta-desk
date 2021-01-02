@@ -6,6 +6,8 @@ import (
 	"os"
 	"path"
 
+	"github.com/TheBoringDude/zeta-desk/utils"
+	"github.com/fsnotify/fsnotify"
 	"github.com/wailsapp/wails"
 )
 
@@ -21,6 +23,7 @@ type Collections struct {
 	datapath string
 	runtime  *wails.Runtime
 	logger   *wails.CustomLogger
+	watcher  *fsnotify.Watcher
 }
 
 // NewCollections => attemps to create a new Collections list
@@ -55,4 +58,13 @@ func (c *Collections) LoadCollections() (string, error) {
 // SaveCollections => saves the collections to the data file
 func (c *Collections) SaveCollections(collections string) error {
 	return ioutil.WriteFile(c.filename, []byte(collections), 0600)
+}
+
+// CreateDataFile => creates the data file for the collection
+func (c *Collections) CreateDataFile(filename string) {
+	dataPath := path.Join(c.datapath, "data")
+	dataFile := path.Join(dataPath, filename)
+	
+	// create the initial file
+	utils.EnsureFileFolder(dataPath, dataFile)
 }

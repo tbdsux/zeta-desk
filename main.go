@@ -10,6 +10,7 @@ import (
 )
 
 // WailsInit => runtime events for Items
+// it doesn't start watching the data files onLoad
 func (i *Items) WailsInit(runtime *wails.Runtime) error {
 	i.runtime = runtime
 
@@ -17,6 +18,7 @@ func (i *Items) WailsInit(runtime *wails.Runtime) error {
 }
 
 // WailsInit => runtime events for Collections
+// it loads the main data file onLoad
 func (c *Collections) WailsInit(runtime *wails.Runtime) error {
 	c.runtime = runtime
 	c.logger = c.runtime.Log.New("Collections")
@@ -35,7 +37,7 @@ func (c *Collections) WailsInit(runtime *wails.Runtime) error {
 	utils.EnsureFileFolder(c.datapath, c.filename)
 
 	// return the watcher
-	return utils.StartWatcher(c.runtime, c.logger, c.filename, "datamodified")
+	return c.StartWatcher()
 }
 
 // APP is based from tutorial: https://wails.app/tutorials/todo/
@@ -54,8 +56,8 @@ func main() {
 	}
 
 	app := wails.CreateApp(&wails.AppConfig{
-		Width:  1000,
-		Height: 600,
+		Width:  1100,
+		Height: 590,
 		Title:  "Zeta | Simple Desktop APP for Managing Collections",
 		JS:     js,
 		CSS:    css,
