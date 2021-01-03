@@ -143,28 +143,32 @@ export default function CollectionModal(props) {
     setAddModal(false)
   }
 
-  // load items from items data file
-  const loadItems = () => {
-    window.backend.Items.LoadItems().then((res) => {
-      try {
-        // props.setItems(JSON.parse(res))
-        setViewItems(JSON.parse(res))
-      } catch (e) {
-        console.error(e)
-      }
-    })
-  }
+  const [saved, setSaved] = useState(false)
 
   // handle removing of items
   const handleRemoveItem = (item) => {
     var items = viewItems
-    items.splice(items.indexOf(item))
+    items.splice(items.indexOf(item), 1)
 
-    setModified(true)
     setViewItems(items)
+    setModified(true)
   }
 
   useEffect(() => {
+    // load items from items data file
+    const loadItems = () => {
+      window.backend.Items.LoadItems()
+        .then((res) => {
+          try {
+            // props.setItems(JSON.parse(res))
+            setViewItems(JSON.parse(res))
+          } catch (e) {
+            console.error(e)
+          }
+        })
+        .catch((e) => console.error(e))
+    }
+
     // if loaded once and is first initialization
     if (props.init) {
       window.backend.Items.Initialize(collection.itemList)
@@ -178,19 +182,24 @@ export default function CollectionModal(props) {
 
     // items_modified -> event
     Wails.Events.On('items_modified', () => {
-      loadItems()
+      if (saved) {
+        setSaved(false)
+        loadItems()
+      }
     })
   })
 
   // save items, if modified == true
   useEffect(() => {
     if (modified) {
-      const saveItems = () => {
-        window.backend.Items.SaveItems(JSON.stringify(viewItems, null, 2))
-      }
+      window.backend.Items.SaveItems(JSON.stringify(viewItems, null, 2))
+        .then(() => {
+          setSaved(true)
+          setModified(false)
+        })
+        .catch((e) => console.error(e))
 
-      saveItems()
-      setModified(false)
+      // saveItems()
     }
   }, [modified, viewItems])
 
@@ -293,7 +302,7 @@ export default function CollectionModal(props) {
               <hr />
 
               <div>
-                <Row md={3}>
+                <Row md={4}>
                   {searchResults.map((res) =>
                     handleCoverImage(collection.type, res) ? (
                       <SearchResult

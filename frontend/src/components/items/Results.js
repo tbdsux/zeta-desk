@@ -50,7 +50,7 @@ export default function SearchResult(props) {
   // anime || manga
   else if (props.type === 'anime' || props.type === 'manga') {
     // set result title
-    if (result.start_date !== undefined) {
+    if (result.start_date !== undefined && result.start_date !== null) {
       resTitle = result.title + ' (' + result.start_date.split('-')[0] + ')'
     } else {
       resTitle = result.title
@@ -90,7 +90,10 @@ export default function SearchResult(props) {
           <h5 className="font-weight-light">{resTitle}</h5>
           <Button
             variant="primary"
-            onClick={() => props.handleAddNewItem(resCover, resTitle)}
+            onClick={() => {
+              console.log('added')
+              props.handleAddNewItem(resCover, resTitle)
+            }}
           >
             add item
           </Button>

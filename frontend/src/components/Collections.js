@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid'
 
 import MapCol from './collections/Map'
 import AddUpdateModalContent from './collections/AddUpdate'
-import CollectionsModal from './Modal'
+import CollectionsModal from './ItemsModal'
 
 import Modal from 'react-modal'
 import * as Wails from '@wailsapp/runtime'
@@ -169,8 +169,8 @@ export default function NewCollection() {
   const handleRemoveCollection = (collection, remove) => {
     // remove the collection
     var newCols = collections
-    const index = newCols.indexOf(collection)
-    newCols.splice(index, 1)
+    newCols.splice(newCols.indexOf(collection), 1)
+
     for (var i = 0; i < newCols.length; i++) {
       newCols[i].id = i
     }

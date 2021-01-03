@@ -30,7 +30,7 @@ func NewItemsCollections() (*Items, error) {
 		return items, err
 	}
 
-	items.datapath = path.Join(homedir, ZETADATADIR, COLLECTIONS_DIR)
+	items.datapath = path.Join(homedir, ZETADATADIR, COLLECTIONSDIR)
 
 	return items, nil
 }
@@ -58,7 +58,6 @@ func (i *Items) StopWatcher() error {
 // LoadItems => loads the items from a collection data file
 func (i *Items) LoadItems() (string, error) {
 	bytes, err := ioutil.ReadFile(i.datafile)
-	fmt.Println(i.datafile)
 	if err != nil {
 		err = fmt.Errorf("Unable to load datafile: %s", i.datafile)
 	}

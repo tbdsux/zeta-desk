@@ -1,13 +1,10 @@
 import React from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './custom.css'
-import 'popper.js/dist/popper.min.js'
 import { Container } from 'react-bootstrap'
 
 // components
-import NewCollection from './components/NewCollection'
-
-global.jQuery = require('jquery')
+import NewCollection from './components/Collections'
 
 function App() {
   return (
