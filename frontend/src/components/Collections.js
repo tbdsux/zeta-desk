@@ -125,7 +125,15 @@ export default function NewCollection() {
       name: name,
       description: desc,
       type: type,
-      itemList: nanoid() + '.json',
+    }
+
+    // if doing an update
+    // do not change the itemlist
+    if (update) {
+      item.itemList = upItem.itemList
+    } else {
+      // generate a new list name if not doing and update
+      item.itemList = nanoid() + '.json'
     }
 
     const check = checkIfExists(item)
