@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Modal, Button, Form, Row, Col, Image } from 'react-bootstrap'
+import { Modal, Button, Form, Row, Col, Image, Alert } from 'react-bootstrap'
 import SearchResult from './items/Results'
 import axios from 'axios'
 import { nanoid } from 'nanoid'
@@ -7,7 +7,14 @@ import { nanoid } from 'nanoid'
 import * as Wails from '@wailsapp/runtime'
 
 export default function CollectionModal(props) {
+  // error state handler
+  const [error, setError] = useState('')
+  const [showError, setShowError] = useState(false)
+
+  // get and set the collection from props
   const collection = props.collection
+
+  // credits for APIs used
   const sources = {
     movies: 'TMDB (TheMoveDatabase.org)',
     seris: 'TMDB (TheMoveDatabase.org)',
@@ -17,9 +24,9 @@ export default function CollectionModal(props) {
     books: 'OpenLibrary.org',
   }
 
+  // other states
   const [modified, setModified] = useState(false)
   const [viewItems, setViewItems] = useState([])
-  // const [init, setInit] = useState(true)
 
   // items searching
   const [addModal, setAddModal] = useState(false)
@@ -163,10 +170,22 @@ export default function CollectionModal(props) {
             // props.setItems(JSON.parse(res))
             setViewItems(JSON.parse(res))
           } catch (e) {
-            console.error(e)
+            {
+              // show the error message
+              setError(
+                'There was a problem trying to decode the data file. Please revert the change you have made if you edited it. If not, please report this problem.',
+              )
+              setShowError(true)
+            }
           }
         })
-        .catch((e) => console.error(e))
+        .catch((e) => {
+          // show the error message
+          setError(
+            'There was a problem while trying to laod the items from the data file of the collection. Please do not edit its data file. Try to report this problem if persits.',
+          )
+          setShowError(true)
+        })
     }
 
     // if loaded once and is first initialization
@@ -177,7 +196,13 @@ export default function CollectionModal(props) {
 
           props.setInit(false)
         })
-        .catch((e) => console.error(e))
+        .catch((e) => {
+          // show the error message
+          setError(
+            'There was a problem on opening and initializing the items from the collection.',
+          )
+          setShowError(true)
+        })
     }
 
     // items_modified -> event
@@ -197,9 +222,13 @@ export default function CollectionModal(props) {
           setSaved(true)
           setModified(false)
         })
-        .catch((e) => console.error(e))
-
-      // saveItems()
+        .catch((e) => {
+          // show the error message
+          setError(
+            'There was a problem trying to save the items to the collections. If you have modified its data file, try to revert the changes and try again. If not, please report this problem.',
+          )
+          setShowError(true)
+        })
     }
   }, [modified, viewItems])
 
@@ -224,6 +253,14 @@ export default function CollectionModal(props) {
           </div>
         </Modal.Header>
         <Modal.Body className="overflow-auto">
+          {/* show the error message */}
+          {showError ? (
+            <Alert variant="danger">
+              <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
+              <p>{error}</p>
+            </Alert>
+          ) : null}
+
           <Row md={5}>
             {viewItems.map((item) => (
               <Col key={item.id}>

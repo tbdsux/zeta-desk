@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Button, Modal as ColModal, Row, Container } from 'react-bootstrap'
+import {
+  Button,
+  Modal as ColModal,
+  Row,
+  Container,
+  Alert,
+} from 'react-bootstrap'
 import { nanoid } from 'nanoid'
 
 import MapCol from './collections/Map'
@@ -12,6 +18,10 @@ import * as Wails from '@wailsapp/runtime'
 Modal.setAppElement('#app')
 
 export default function NewCollection() {
+  // error state
+  const [error, setError] = useState('')
+  const [showError, setShowError] = useState(false)
+
   // reference form modal inputs
   const colName = useRef(null)
   const colDesc = useRef(null)
@@ -39,6 +49,8 @@ export default function NewCollection() {
   const [saved, setSaved] = useState(false)
   const [modified, setModified] = useState(false)
 
+  // to be used by items for handling and showing
+  // the items in a collection
   const [viewCollection, setViewCollection] = useState({})
 
   // close form modal
@@ -188,7 +200,13 @@ export default function NewCollection() {
         .then(() => {
           setModified(true)
         })
-        .catch((e) => console.error(e))
+        .catch((e) => {
+          // show error if there is
+          setError(
+            'The data file cannot be removed, please report the problem.',
+          )
+          setShowError(true)
+        })
     }
   }
 
@@ -200,58 +218,62 @@ export default function NewCollection() {
     setUpItem(collection)
   }
 
-  // load collections from file
-  const loadCollections = () => {
-    window.backend.Collections.LoadCollections().then((list) => {
-      try {
-        setCollections(JSON.parse(list))
-
-        setModified(false)
-      } catch (e) {
-        // this will crash the app,
-        // todo: add handler and show the error on the ui
-        console.error(e)
-      }
-    })
-  }
-
   useEffect(() => {
+    // load collections from file
+    const loadCollections = () => {
+      window.backend.Collections.LoadCollections().then((list) => {
+        try {
+          setCollections(JSON.parse(list))
+
+          setModified(false)
+        } catch (e) {
+          // show error if there is
+          setError(
+            'There was a problem while trying to load the collections from the main data file. Please edit only the main data file if you know what your are doing. For now, please revert the change you have made from it.',
+          )
+          setShowError(true)
+        }
+      })
+    }
+
+    // this will load the collections on mounted
+    if (loadOnce) {
+      loadCollections()
+      setLoadOnce(false)
+    }
+
     Wails.Events.On('datamodified', () => {
       // if not set, it will loop around
       // might be a bug with the fsnotify watcher
       // I don't know why this works though
+      // this will be updated soon -> so that this will work if the file is modified real time
       if (saved && modified) {
         loadCollections()
         setSaved(false)
       }
     })
-  }, [saved, modified, collections])
+  })
 
   useEffect(() => {
-    // this will only load the
-    // list once on startup
-    if (loadOnce) {
-      loadCollections()
-      setLoadOnce(false)
-    }
-  }, [loadOnce])
-
-  useEffect(() => {
-    const saveCollections = () => {
-      window.backend.Collections.SaveCollections(
-        JSON.stringify(collections, null, 2),
-      )
-    }
-
     // not confirming if modified
     // will loop around this function
     // and will crash the app
     // I don't know why this works though, .. hmmm
     if (modified) {
-      saveCollections()
-
-      setSaved(true)
-      setModified(false)
+      window.backend.Collections.SaveCollections(
+        JSON.stringify(collections, null, 2),
+      )
+        .then(() => {
+          setSaved(true)
+          setModified(false)
+        })
+        .catch((e) => {
+          // show error if there is
+          setError(
+            'There was a problem while trying to save the collection to the main data file. Please undo anything that you did to it and try again. If not, please report this problem.',
+          )
+          setShowError(true)
+        })
     }
   }, [collections, modified])
 
@@ -277,7 +299,13 @@ export default function NewCollection() {
         setInit(false)
         setViewCollection({}) // remove the current item
       })
-      .catch((e) => console.error(e))
+      .catch((e) => {
+        // show error if there is
+        setError(
+          'There was a problem in removing the data file from watch list.',
+        )
+        setShowError(true)
+      })
   }
 
   return (
@@ -291,6 +319,14 @@ export default function NewCollection() {
         </div>
 
         <hr />
+
+        {/* show errors in here */}
+        {showError ? (
+          <Alert variant="danger">
+            <Alert.Heading>Oh snap! You got an error!</Alert.Heading>
+            <p>{error}</p>
+          </Alert>
+        ) : null}
 
         <Container>
           {/* map collections */}
