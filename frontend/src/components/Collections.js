@@ -232,8 +232,6 @@ export default function NewCollection() {
       window.backend.Collections.LoadCollections().then((list) => {
         try {
           setCollections(JSON.parse(list))
-
-          setModified(false)
         } catch (e) {
           // show error if there is
           setError(
@@ -245,6 +243,8 @@ export default function NewCollection() {
     }
 
     // this will load the collections on mounted
+    // issue: this being called on re-render, ..
+    // todo: this should be only called once
     if (loadOnce) {
       loadCollections()
       setLoadOnce(false)
@@ -257,10 +257,12 @@ export default function NewCollection() {
       // this will be updated soon -> so that this will work if the file is modified real time
       if (saved && modified) {
         loadCollections()
+
+        setModified(false)
         setSaved(false)
       }
     })
-  })
+  }, [loadOnce, saved, modified])
 
   useEffect(() => {
     // not confirming if modified

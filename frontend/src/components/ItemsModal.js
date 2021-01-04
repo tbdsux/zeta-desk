@@ -170,13 +170,11 @@ export default function CollectionModal(props) {
             // props.setItems(JSON.parse(res))
             setViewItems(JSON.parse(res))
           } catch (e) {
-            {
-              // show the error message
-              setError(
-                'There was a problem trying to decode the data file. Please revert the change you have made if you edited it. If not, please report this problem.',
-              )
-              setShowError(true)
-            }
+            // show the error message
+            setError(
+              'There was a problem trying to decode the data file. Please revert the change you have made if you edited it. If not, please report this problem.',
+            )
+            setShowError(true)
           }
         })
         .catch((e) => {
